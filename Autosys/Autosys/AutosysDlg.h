@@ -38,5 +38,7 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void foldersearch();
 
+	void operate();
+
 	CListBox m_listbox;
 };

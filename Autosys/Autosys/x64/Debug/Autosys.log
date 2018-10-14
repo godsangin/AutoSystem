@@ -1,2 +1,8 @@
-﻿  Autosys.vcxproj -> C:\Users\sanginLee\Desktop\git\AutoSystem\Autosys\x64\Debug\Autosys.exe
-  Autosys.vcxproj -> C:\Users\sanginLee\Desktop\git\AutoSystem\Autosys\x64\Debug\Autosys.pdb (Partial PDB)
+﻿  AutosysDlg.cpp
+d:\공부\4학년\1학기\jolp\autosystem\autosys\autosys\autosysdlg.cpp(210): warning C4800: 'BOOL': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+d:\공부\4학년\1학기\jolp\autosystem\autosys\autosys\autosysdlg.cpp(213): warning C4800: 'BOOL': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+d:\공부\4학년\1학기\jolp\autosystem\autosys\autosys\autosysdlg.cpp(237): warning C4800: 'BOOL': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+d:\공부\4학년\1학기\jolp\autosystem\autosys\autosys\autosysdlg.cpp(239): warning C4800: 'BOOL': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+d:\공부\4학년\1학기\jolp\autosystem\autosys\autosys\autosysdlg.cpp(245): warning C4800: 'BOOL': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+  Autosys.vcxproj -> D:\공부\4학년\1학기\jolp\AutoSystem\Autosys\x64\Debug\Autosys.exe
+  Autosys.vcxproj -> D:\공부\4학년\1학기\jolp\AutoSystem\Autosys\x64\Debug\Autosys.pdb (Partial PDB)
