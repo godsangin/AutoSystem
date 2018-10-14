@@ -172,8 +172,9 @@ HCURSOR CAutosysDlg::OnQueryDragIcon()
 
 
 
-void CAutosysDlg::OnBnClickedButton1()
+void CAutosysDlg::OnBnClickedButton1()//추가 버튼
 {
+	
 	filename filename;
 	ShowWindow(SW_HIDE);
 	filename.DoModal();
@@ -185,24 +186,24 @@ void CAutosysDlg::OnBnClickedButton1()
 }
 
 
-void CAutosysDlg::OnBnClickedOk()
+void CAutosysDlg::OnBnClickedOk() //실행버튼
 {
-	CString selectjob;
-	m_listbox.GetText(m_listbox.GetCurSel(), selectjob);
+	
+	
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	MessageBox(selectjob);
+	operate();
 
 	CDialogEx::OnOK();
 }
 
 
-void CAutosysDlg::OnBnClickedCancel()
+void CAutosysDlg::OnBnClickedCancel()//취소버튼
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CDialogEx::OnCancel();
 }
 
-void CAutosysDlg::foldersearch() {
+void CAutosysDlg::foldersearch() { //파일찾기
 	CFileFind finder;
 	string s = "auto/*.*";
 	CString sc(s.c_str());
@@ -218,4 +219,30 @@ void CAutosysDlg::foldersearch() {
 			m_listbox.AddString(curfile);
 		}
 	}
+}
+
+void CAutosysDlg::operate() {
+	CString selectjob;
+	CFileFind finder;
+	CString locate;
+	int i = 1;
+	bool working;
+	m_listbox.GetText(m_listbox.GetCurSel(), selectjob);
+	CT2CA pszConvertedAnsiString(selectjob);
+	std::string sselectjob(pszConvertedAnsiString);
+	sselectjob = "auto/" +sselectjob;
+
+	std::string s = std::to_string(i++);
+	locate = (sselectjob + "/"+s+"@*.*").c_str();
+	working = finder.FindFile(locate);
+	while (working) {
+		working = finder.FindNextFile();
+		CString curfile = finder.GetFileName();
+		MessageBox(curfile);
+		s = std::to_string(i++);
+		locate = (sselectjob + "/" + s + "@*.*").c_str();
+		
+		working = finder.FindFile(locate);
+	}
+
 }

@@ -328,7 +328,7 @@ static void imageCapture() {
 	}
 
 	namedWindow("Original IMG");
-	resize(img, dst, Size(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)), 0, 0, CV_INTER_NN);
+	resize(img, dst, Size(1920, 1080), 0, 0, CV_INTER_NN);
 
 	imshow("Original IMG", dst);
 	setMouseCallback("Original IMG", mouse_callback);
