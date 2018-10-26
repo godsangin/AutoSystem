@@ -18,12 +18,12 @@
 #include <Windows.h>
 #include "Resource.h"
 void windowcapture();
-void goevent(int x, int y,int flag);
+void goevent(int x, int y, int flag);
 void Show(char *str, IplImage *img);
 using namespace cv;
 using namespace std;
 int getHangulKey(wchar_t c);
-void keybdeventAction(wchar_t buffer[], int strLength);
+void keybdeventAction(wchar_t* buffer);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,15 +37,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-// 구현입니다.
+														// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -114,13 +114,13 @@ BOOL CAutosysDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
 	}
-	
+
 	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
 	//  프레임워크가 이 작업을 자동으로 수행합니다.
-	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
-	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
+	SetIcon(m_hIcon, TRUE);         // 큰 아이콘을 설정합니다.
+	SetIcon(m_hIcon, FALSE);      // 작은 아이콘을 설정합니다.
 
-	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+								  // TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 	foldersearch();
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -179,7 +179,7 @@ HCURSOR CAutosysDlg::OnQueryDragIcon()
 
 void CAutosysDlg::OnBnClickedButton1()//추가 버튼
 {
-	
+
 	filename filename;
 	ShowWindow(SW_HIDE);
 	filename.DoModal();
@@ -193,8 +193,8 @@ void CAutosysDlg::OnBnClickedButton1()//추가 버튼
 
 void CAutosysDlg::OnBnClickedOk() //실행버튼
 {
-	
-	
+
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	operate();
 
@@ -222,9 +222,11 @@ void CAutosysDlg::foldersearch() { //파일찾기
 		if (finder.IsDirectory()) {
 			CString curfile = finder.GetFileName();
 			m_listbox.AddString(curfile);
+
 		}
 	}
 }
+
 
 void CAutosysDlg::operate() {
 	CString selectjob;
@@ -235,10 +237,10 @@ void CAutosysDlg::operate() {
 	m_listbox.GetText(m_listbox.GetCurSel(), selectjob);
 	CT2CA pszConvertedAnsiString(selectjob);
 	std::string sselectjob(pszConvertedAnsiString);
-	sselectjob = "auto/" +sselectjob;
+	sselectjob = "auto/" + sselectjob;
 
 	std::string s = std::to_string(i++);
-	locate = (sselectjob + "/"+s+"@*.*").c_str();
+	locate = (sselectjob + "/" + s + "@*.*").c_str();
 	working = finder.FindFile(locate);
 	while (working) {
 		working = finder.FindNextFile();
@@ -246,15 +248,15 @@ void CAutosysDlg::operate() {
 		//MessageBox(curfile);
 		CT2CA pszConvertedAnsiString(curfile);
 		std::string ccurfile(pszConvertedAnsiString);
-		parsing(sselectjob,ccurfile);
+		parsing(sselectjob, ccurfile);
 		s = std::to_string(i++);
 		locate = (sselectjob + "/" + s + "@*.*").c_str();
-		
+
 		working = finder.FindFile(locate);
 	}
 
 }
-void CAutosysDlg::parsing(string jobname,string filename) {
+void CAutosysDlg::parsing(string jobname, string filename) {
 	char *file = new char[filename.length() + 1];
 	strcpy(file, filename.c_str());
 	char *token = NULL;
@@ -282,7 +284,13 @@ void CAutosysDlg::parsing(string jobname,string filename) {
 		if (openFile.is_open()) {
 			string line;
 			getline(openFile, line);
+			CString cs(line.c_str());
 
+			wchar_t* buffer = cs.GetBuffer();
+			std::wstring widestr = std::wstring(line.begin(), line.end());
+			const wchar_t* wchars = widestr.c_str();
+
+			keybdeventAction(buffer);
 		}
 	}
 	token = strtok(NULL, parser);
@@ -307,11 +315,11 @@ void CAutosysDlg::matching(string jobname, string filename, int flag) {
 	if (max > 0.9) {
 		printf("x = %d, y = %d 최대 %lf", left_top.x, left_top.y, max);
 
-		goevent((left_top.x + (B->width) / 2) / windowmultiply, (left_top.y + (B->height) / 2) / windowmultiply,flag); // ??????
+		goevent((left_top.x + (B->width) / 2) / windowmultiply, (left_top.y + (B->height) / 2) / windowmultiply, flag); // ??????
 
-		//Show("T9-result", A); // 결과 보기
-							  //Show("T9-sample", B); // 스테이플러(B) 보기
-							  //Show("C", C);   // 상관계수 이미지 보기
+																														//Show("T9-result", A); // 결과 보기
+																														//Show("T9-sample", B); // 스테이플러(B) 보기
+																														//Show("C", C);   // 상관계수 이미지 보기
 		cvWaitKey(0);
 
 		// 모든 이미지 릴리즈
@@ -329,7 +337,7 @@ void CAutosysDlg::matching(string jobname, string filename, int flag) {
 	}
 }
 
-void goevent(int x, int y,int flag) {
+void goevent(int x, int y, int flag) {
 	SetCursorPos(x, y);
 	if (flag == 1) {
 		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -345,7 +353,7 @@ void goevent(int x, int y,int flag) {
 		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 	}
-	
+
 };
 void Show(char *str, IplImage *img)
 {
@@ -353,56 +361,66 @@ void Show(char *str, IplImage *img)
 	cvShowImage(str, img);
 }
 
-void keybdeventAction(wchar_t buffer[], int strLength) {
+void keybdeventAction(wchar_t* buffer) {
+	boolean exsentence = false;
+	Sleep(1000);
+	while (*buffer != L'\0'){
+		wchar_t aa = *buffer;
+		boolean korean =(*buffer >= 12593 && *buffer <= 42195);
+		if (!(exsentence == korean)) {
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		}
+		if (aa == L'ㄲ'|| aa == L'ㄸ'|| aa == L'ㅉ'|| aa == L'ㅃ'|| aa == L'ㅆ') {
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(getHangulKey(*buffer), 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(getHangulKey(*buffer), 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+			Sleep(100);
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+			
+	
+		}
+		else if (korean) {
+			keybd_event(getHangulKey(*buffer), 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(getHangulKey(*buffer), 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		}
+		else if (*buffer >= 48 && *buffer <= 57) {
+			keybd_event(*buffer, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(*buffer, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		}
+		else if (*buffer >= 65 && *buffer <= 90) {
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(*buffer, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(*buffer, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+			Sleep(100);
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+			
+		}
+		else if (*buffer >= 97 && *buffer <= 122) {
+			keybd_event(*buffer - 32, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(*buffer - 32, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+		}
+		else if (*buffer == 64) {
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY | 0, 0);
+			Sleep(100);
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+			Sleep(100);
+			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 
-	for (int i = 0; i < strLength; i++) {
-		if (::GetKeyState(VK_CAPITAL)) {
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, 0);
 		}
-		if (::GetKeyState(VK_SHIFT)) {
-			keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-		}
-		if (!::GetKeyState(VK_HANGEUL) && buffer[i] & 0x80 != 1) {
-			keybd_event(VK_HANGEUL, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-
-		}
-		if (buffer[i] & 0x80 != 1) {
-
-			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_KEYUP, 0);
-			Sleep(100);
-			keybd_event(VK_HANGEUL, 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] >= 48 && buffer[i] <= 57) {
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] >= 65 && buffer[i] <= 90) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
-
-		}
-		else if (buffer[i] >= 97 && buffer[i] <= 122) {
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] == 64) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(50, 0, KEYEVENTF_KEYUP, 0);
-
-		}
+		
+		++buffer;
+		exsentence = korean;
 	}
 }
 
@@ -410,13 +428,23 @@ int getHangulKey(wchar_t c) {
 	switch (c) {
 	case L'ㅂ':
 		return 81;
+	case L'ㅃ':
+		return 81;
 	case L'ㅈ':
 		return 87;
+	case L'ㅉ':
+		return 87;
 	case L'ㄷ':
+		return 89;
+	case L'ㄸ':
 		return 69;
 	case L'ㄱ':
 		return 82;
+	case L'ㄲ':
+		return 82;
 	case L'ㅅ':
+		return 84;
+	case L'ㅆ':
 		return 84;
 	case L'ㅛ':
 		return 89;
