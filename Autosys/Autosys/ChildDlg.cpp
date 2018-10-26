@@ -197,6 +197,7 @@ void keybdeventAction(char buffer[], int strLength) {
 		}
 	}
 }
+
 void windowcapture() {
 	//ShowWindow(SW_SHOWMINIMIZED);
 	//visible = 0;
