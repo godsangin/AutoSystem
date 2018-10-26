@@ -8,6 +8,8 @@
 #include "ChildDlg.h"
 
 // filename 대화 상자입니다.
+void keybdeventAction(wchar_t buffer[], int strLength);
+int getHangulKey(wchar_t c);
 
 IMPLEMENT_DYNAMIC(filename, CDialogEx)
 filename::filename(CWnd* pParent /*=NULL*/)
@@ -54,7 +56,9 @@ void filename::OnEnChangeEdit1()
 
 void filename::OnBnClickedOk()
 {
-	
+	wchar_t c[] = L"ㅇㅏㄴㄴㅕㅇ";
+	GotoDlgCtrl(GetDlgItem(IDC_EDIT1));
+	keybdeventAction(c, 6);
 	CString filename;
 	GetDlgItemText(IDC_EDIT1, filename);
 	CString cstring(_T("auto/"));
@@ -75,4 +79,114 @@ void filename::OnBnClickedOk()
 	
 	CDialogEx::OnOK();
 
+}
+void keybdeventAction(wchar_t buffer[], int strLength) {
+	
+	for (int i = 0; i < strLength; i++) {
+		if (::GetKeyState(VK_CAPITAL)) {
+			keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, 0);
+		}
+		if (::GetKeyState(VK_SHIFT)) {
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
+		}
+		if (!::GetKeyState(VK_HANGEUL) && buffer[i] & 0x80 != 1) {
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			
+		}
+		if (buffer[i] & 0x80 != 1) {
+			
+			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_KEYUP, 0);
+			Sleep(100);
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] >= 48 && buffer[i] <= 57) {
+			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] >= 65 && buffer[i] <= 90) {
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
+			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
+
+		}
+		else if (buffer[i] >= 97 && buffer[i] <= 122) {
+			keybd_event(buffer[i] - 32, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(buffer[i] - 32, 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] == 64) {
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
+			keybd_event(50, 0, KEYEVENTF_KEYUP, 0);
+
+		}
+	}
+}
+
+int getHangulKey(wchar_t c) {
+	switch (c) {
+	case L'ㅂ':
+		return 81;
+	case L'ㅈ':
+		return 87;
+	case L'ㄷ':
+		return 69;
+	case L'ㄱ':
+		return 82;
+	case L'ㅅ':
+		return 84;
+	case L'ㅛ':
+		return 89;
+	case L'ㅕ':
+		return 85;
+	case L'ㅑ':
+		return 73;
+	case L'ㅐ':
+		return 79;
+	case L'ㅔ':
+		return 80;
+	case L'ㅁ':
+		return 65;
+	case L'ㄴ':
+		return 83;
+	case L'ㅇ':
+		return 68;
+	case L'ㄹ':
+		return 70;
+	case L'ㅎ':
+		return 71;
+	case L'ㅗ':
+		return 72;
+	case L'ㅓ':
+		return 74;
+	case L'ㅏ':
+		return 75;
+	case L'ㅣ':
+		return 76;
+	case L'ㅋ':
+		return 90;
+	case L'ㅌ':
+		return 88;
+	case L'ㅊ':
+		return 67;
+	case L'ㅍ':
+		return 86;
+	case L'ㅠ':
+		return 66;
+	case L'ㅜ':
+		return 78;
+	case L'ㅡ':
+		return 77;
+	}
+	return 0;
 }

@@ -216,6 +216,8 @@ void CAutosysDlg::foldersearch() {
 		if (finder.IsDirectory()) {
 			CString curfile = finder.GetFileName();
 			m_listbox.AddString(curfile);
+			
 		}
 	}
 }
+

@@ -18,10 +18,10 @@
 
 using namespace std;
 using namespace cv;
-void keybdeventAction(char buffer[], int strLength);
 void windowcapture();
 static void mouse_callback(int event, int x, int y, int, void* param);
 static void imageCapture();
+int BreakHan(wchar_t *str, wchar_t *buffer, UINT nSize);
 String strValue;
 Mat hwnd2mat(HWND hwnd);
 bool ldown = false, lup = false;
@@ -100,9 +100,18 @@ void ChildDlg::OnBnClickedButton4()
 	ofstream out(filename + "/" + sqstr + "@" + flag + ".txt");
 	//ofstream out("ddd.txt");
 	sequence++;
+	wchar_t *str;
+	wchar_t buffer[4096];
 	CString s;
 	GetDlgItemText(IDC_EDIT1, s);
-	CT2CA pszConvertedAnsiString(s);
+	str = LPWSTR(LPCTSTR(s));
+	BreakHan(str, buffer, sizeof buffer);
+
+	setlocale(LC_ALL, "Korean");
+
+	SetDlgItemText(IDC_EDIT1, buffer);
+	
+	CT2CA pszConvertedAnsiString(buffer);
 	std::string sentence(pszConvertedAnsiString);
 	if (out.is_open()) {
 		out << sentence;
@@ -159,44 +168,7 @@ void ChildDlg::OnEnChangeEdit1()
 
 	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
-void keybdeventAction(char buffer[], int strLength) {
-	for (int i = 0; i < strLength; i++) {
-		if (::GetKeyState(VK_CAPITAL)) {
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, 0);
-		}
-		if (::GetKeyState(VK_SHIFT)) {
-			keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-		}
-		if (buffer[i] >= 48 && buffer[i] <= 57) {
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] >= 65 && buffer[i] <= 90) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
 
-		}
-		else if (buffer[i] >= 97 && buffer[i] <= 122) {
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] == 64) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(50, 0, KEYEVENTF_KEYUP, 0);
-
-		}
-	}
-}
 void windowcapture() {
 	//ShowWindow(SW_SHOWMINIMIZED);
 	//visible = 0;
@@ -334,4 +306,60 @@ static void imageCapture() {
 	setMouseCallback("Original IMG", mouse_callback);
 	waitKey(0);
 
+}
+
+static int BreakHan(wchar_t *str, wchar_t *buffer, UINT nSize)
+{
+	//초성 
+	static const wchar_t wcHead[] = { L'ㄱ', L'ㄲ', L'ㄴ', L'ㄷ',
+		L'ㄸ', L'ㄹ', L'ㅁ', L'ㅂ',
+		L'ㅃ', L'ㅅ', L'ㅆ', L'ㅇ',
+		L'ㅈ', L'ㅉ', L'ㅊ', L'ㅋ',
+		L'ㅌ', L'ㅍ', L'ㅎ' };
+
+	//중성 
+	static const wchar_t wcMid[] = { L'ㅏ', L'ㅐ', L'ㅑ', L'ㅒ',
+		L'ㅓ', L'ㅔ', L'ㅕ', L'ㅖ',
+		L'ㅗ', L'ㅘ', L'ㅙ', L'ㅚ',
+		L'ㅛ', L'ㅜ', L'ㅝ', L'ㅞ',
+		L'ㅟ', L'ㅠ', L'ㅡ', L'ㅢ', L'ㅣ' };
+
+	//종성 
+	static const wchar_t wcTail[] = { L' ', L'ㄱ', L'ㄲ', L'ㄳ',
+		L'ㄴ', L'ㄵ', L'ㄶ', L'ㄷ',
+		L'ㄹ', L'ㄺ', L'ㄻ', L'ㄼ',
+		L'ㄽ', L'ㄾ', L'ㄿ', L'ㅀ',
+		L'ㅁ', L'ㅂ', L'ㅄ', L'ㅅ',
+		L'ㅆ', L'ㅇ', L'ㅈ', L'ㅊ',
+		L'ㅋ', L'ㅌ', L'ㅍ', L'ㅎ' };
+
+	UINT    pos = 0;
+
+	while (*str != '\0')
+	{
+		if (*str < 256)
+		{
+			if (pos + 2 >= nSize - 1)
+				break;
+
+			buffer[pos] = *str;
+			++pos;
+		}
+		else
+		{
+			if (pos + 4 >= nSize - 1)
+				break;
+
+			buffer[pos] = wcHead[(*str - 0xAC00) / (21 * 28)];
+			buffer[pos + 1] = wcMid[(*str - 0xAC00) % (21 * 28) / 28];
+			buffer[pos + 2] = wcTail[(*str - 0xAC00) % 28];
+
+			pos += 3;
+		}
+
+		++str;
+	}
+
+	buffer[pos] = '\0';
+	return pos;
 }
