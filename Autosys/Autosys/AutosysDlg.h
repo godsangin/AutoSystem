@@ -4,7 +4,8 @@
 
 #pragma once
 #include "afxwin.h"
-
+#include<iostream>
+using namespace std;
 
 // CAutosysDlg 대화 상자
 class CAutosysDlg : public CDialogEx
@@ -39,6 +40,9 @@ public:
 	afx_msg void foldersearch();
 
 	void operate();
+
+	void parsing(string jobname, string filename);
+	void matching(string jobname, string filename,int flag);
 
 	CListBox m_listbox;
 };

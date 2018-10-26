@@ -1,7 +1,8 @@
 
 // AutosysDlg.cpp : 구현 파일
 //
-
+#define _CRT_SECURE_NO_WARNINGS
+#include <string.h>
 #include "stdafx.h"
 #include "Autosys.h"
 #include "AutosysDlg.h"
@@ -16,7 +17,9 @@
 #include "filename.h"
 #include <Windows.h>
 #include "Resource.h"
-
+void windowcapture();
+void goevent(int x, int y,int flag);
+void Show(char *str, IplImage *img);
 using namespace cv;
 using namespace std;
 
@@ -238,11 +241,107 @@ void CAutosysDlg::operate() {
 	while (working) {
 		working = finder.FindNextFile();
 		CString curfile = finder.GetFileName();
-		MessageBox(curfile);
+		//MessageBox(curfile);
+		CT2CA pszConvertedAnsiString(curfile);
+		std::string ccurfile(pszConvertedAnsiString);
+		parsing(sselectjob,ccurfile);
 		s = std::to_string(i++);
 		locate = (sselectjob + "/" + s + "@*.*").c_str();
 		
 		working = finder.FindFile(locate);
 	}
 
+}
+void CAutosysDlg::parsing(string jobname,string filename) {
+	char *file = new char[filename.length() + 1];
+	strcpy(file, filename.c_str());
+	char *token = NULL;
+	char parser[] = "@.";
+	token = strtok(file, parser);
+	printf("token = %s", token);//첫번째꺼 버림 순서는 이미 끝
+	token = strtok(NULL, parser);
+	printf("token = %s", token);//두번째꺼 좌우더블텍스트
+
+	if (token[0] == '1') {
+		printf("");
+		matching(jobname, filename, 1);
+	}
+	else if (token[0] == '2') {
+		printf("");
+		matching(jobname, filename, 2);
+
+	}
+	else if (token[0] == '3') {
+		printf("");
+		matching(jobname, filename, 3);
+	}
+	else {
+		printf("");
+	}
+	token = strtok(NULL, parser);
+	printf("token = %s", token);//세번째꺼 확장자
+	token = strtok(NULL, parser);
+}
+void CAutosysDlg::matching(string jobname, string filename, int flag) {
+	windowcapture();
+	string file = jobname + "/" + filename;
+	char *cstr = new char[file.length() + 1];
+	strcpy(cstr, file.c_str());
+	double min, max;
+	CvPoint left_top;
+	double windowmultiply = 1;
+	IplImage *A = cvLoadImage("copy.jpg", -1); // 책상(A)을 먼저 읽고
+	IplImage *B = cvLoadImage(cstr, -1); // 스테이플러(B)를 읽는다.
+	IplImage* C = cvCreateImage(cvSize(A->width - B->width + 1, A->height - B->height + 1), IPL_DEPTH_32F, 1); // 상관계수를 구할 이미지(C)
+
+	cvMatchTemplate(A, B, C, CV_TM_CCOEFF_NORMED); // 상관계수를 구하여 C 에 그린다.
+	cvMinMaxLoc(C, &min, &max, NULL, &left_top); // 상관계수가 최대값을 값는 위치 찾기  ?????
+	cvRectangle(A, left_top, cvPoint(left_top.x + B->width, left_top.y + B->height), CV_RGB(255, 0, 0)); // 찾은 물체에 사격형을 그린다.
+	if (max > 0.9) {
+		printf("x = %d, y = %d 최대 %lf", left_top.x, left_top.y, max);
+
+		goevent((left_top.x + (B->width) / 2) / windowmultiply, (left_top.y + (B->height) / 2) / windowmultiply,flag); // ??????
+
+		//Show("T9-result", A); // 결과 보기
+							  //Show("T9-sample", B); // 스테이플러(B) 보기
+							  //Show("C", C);   // 상관계수 이미지 보기
+		cvWaitKey(0);
+
+		// 모든 이미지 릴리즈
+		cvReleaseImage(&A);
+		cvReleaseImage(&B);
+		cvReleaseImage(&C);
+		// 모든 윈도우 제거
+		cvDestroyAllWindows();
+		cvWaitKey(0);
+
+	}
+	else {
+		windowcapture();
+		matching(jobname, filename, flag);
+	}
+}
+
+void goevent(int x, int y,int flag) {
+	SetCursorPos(x, y);
+	if (flag == 1) {
+		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+	}
+	else if (flag == 2) {
+		mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+	}
+	else if (flag == 3) {
+		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+	}
+	
+};
+void Show(char *str, IplImage *img)
+{
+	cvNamedWindow(str, 1);
+	cvShowImage(str, img);
 }
