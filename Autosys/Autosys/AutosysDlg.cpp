@@ -22,6 +22,8 @@ void goevent(int x, int y,int flag);
 void Show(char *str, IplImage *img);
 using namespace cv;
 using namespace std;
+int getHangulKey(wchar_t c);
+void keybdeventAction(wchar_t buffer[], int strLength);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -344,4 +346,115 @@ void Show(char *str, IplImage *img)
 {
 	cvNamedWindow(str, 1);
 	cvShowImage(str, img);
+}
+
+void keybdeventAction(wchar_t buffer[], int strLength) {
+
+	for (int i = 0; i < strLength; i++) {
+		if (::GetKeyState(VK_CAPITAL)) {
+			keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, 0);
+		}
+		if (::GetKeyState(VK_SHIFT)) {
+			keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
+		}
+		if (!::GetKeyState(VK_HANGEUL) && buffer[i] & 0x80 != 1) {
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+
+		}
+		if (buffer[i] & 0x80 != 1) {
+
+			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(getHangulKey(buffer[i]), 0, KEYEVENTF_KEYUP, 0);
+			Sleep(100);
+			keybd_event(VK_HANGEUL, 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] >= 48 && buffer[i] <= 57) {
+			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] >= 65 && buffer[i] <= 90) {
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
+			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
+
+		}
+		else if (buffer[i] >= 97 && buffer[i] <= 122) {
+			keybd_event(buffer[i] - 32, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(buffer[i] - 32, 0, KEYEVENTF_KEYUP, 0);
+		}
+		else if (buffer[i] == 64) {
+			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY, 0);
+			Sleep(100);
+			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
+			keybd_event(50, 0, KEYEVENTF_KEYUP, 0);
+
+		}
+	}
+}
+
+int getHangulKey(wchar_t c) {
+	switch (c) {
+	case L'げ':
+		return 81;
+	case L'じ':
+		return 87;
+	case L'ぇ':
+		return 69;
+	case L'ぁ':
+		return 82;
+	case L'さ':
+		return 84;
+	case L'に':
+		return 89;
+	case L'づ':
+		return 85;
+	case L'ち':
+		return 73;
+	case L'だ':
+		return 79;
+	case L'つ':
+		return 80;
+	case L'け':
+		return 65;
+	case L'い':
+		return 83;
+	case L'し':
+		return 68;
+	case L'ぉ':
+		return 70;
+	case L'ぞ':
+		return 71;
+	case L'で':
+		return 72;
+	case L'っ':
+		return 74;
+	case L'た':
+		return 75;
+	case L'び':
+		return 76;
+	case L'せ':
+		return 90;
+	case L'ぜ':
+		return 88;
+	case L'ず':
+		return 67;
+	case L'そ':
+		return 86;
+	case L'ば':
+		return 66;
+	case L'ぬ':
+		return 78;
+	case L'ぱ':
+		return 77;
+	}
+	return 0;
 }
