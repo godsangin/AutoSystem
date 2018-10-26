@@ -27,9 +27,9 @@ Mat hwnd2mat(HWND hwnd);
 bool ldown = false, lup = false;
 Mat img, dst;
 Point corner1, corner2;
-Rect box; 
+Rect box;
 string filename;
-int sequence=1;
+int sequence = 1;
 string flag;
 // ChildDlg 대화 상자입니다.
 IMPLEMENT_DYNAMIC(ChildDlg, CDialogEx)
@@ -72,7 +72,7 @@ void ChildDlg::OnBnClickedButton1()
 {
 	flag = "1";
 	imageCapture();
-	
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
@@ -159,44 +159,9 @@ void ChildDlg::OnEnChangeEdit1()
 
 	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
-void keybdeventAction(char buffer[], int strLength) {
-	for (int i = 0; i < strLength; i++) {
-		if (::GetKeyState(VK_CAPITAL)) {
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, 0);
-		}
-		if (::GetKeyState(VK_SHIFT)) {
-			keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-		}
-		if (buffer[i] >= 48 && buffer[i] <= 57) {
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] >= 65 && buffer[i] <= 90) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(buffer[i], 0, KEYEVENTF_KEYUP, 0);
 
-		}
-		else if (buffer[i] >= 97 && buffer[i] <= 122) {
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(buffer[i] - 32, 0, KEYEVENTF_KEYUP, 0);
-		}
-		else if (buffer[i] == 64) {
-			keybd_event(16, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			keybd_event(50, 0, KEYEVENTF_EXTENDEDKEY, 0);
-			Sleep(100);
-			keybd_event(16, 0, KEYEVENTF_KEYUP, 0);
-			keybd_event(50, 0, KEYEVENTF_KEYUP, 0);
 
-		}
-	}
-}
+
 
 void windowcapture() {
 	//ShowWindow(SW_SHOWMINIMIZED);
@@ -210,7 +175,7 @@ void windowcapture() {
 
 	Mat src = hwnd2mat(hwndDesktop);
 	//imshow("output", src);
-	
+
 	imwrite("copy.jpg", src);
 	//ShowWindow(SW_RESTORE);
 
@@ -310,7 +275,7 @@ static void mouse_callback(int event, int x, int y, int, void* param) {
 		Mat crop(img, box);
 		imshow("what", crop);
 		string sqstr = to_string(sequence);
-		imwrite(filename+"/" +sqstr+"@"+flag +".jpg", crop);
+		imwrite(filename + "/" + sqstr + "@" + flag + ".jpg", crop);
 		sequence++;
 		ldown = false; lup = false;
 		destroyAllWindows();
@@ -329,7 +294,7 @@ static void imageCapture() {
 	}
 
 	namedWindow("Original IMG");
-	resize(img, dst, Size(1920, 1080), 0, 0, CV_INTER_NN);
+	resize(img, dst, Size(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)), 0, 0, CV_INTER_NN);
 
 	imshow("Original IMG", dst);
 	setMouseCallback("Original IMG", mouse_callback);
