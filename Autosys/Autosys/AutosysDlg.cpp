@@ -278,7 +278,12 @@ void CAutosysDlg::parsing(string jobname,string filename) {
 		matching(jobname, filename, 3);
 	}
 	else {
-		printf("");
+		ifstream openFile(jobname + "/" + filename);
+		if (openFile.is_open()) {
+			string line;
+			getline(openFile, line);
+
+		}
 	}
 	token = strtok(NULL, parser);
 	printf("token = %s", token);//세번째꺼 확장자
