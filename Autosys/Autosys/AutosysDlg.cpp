@@ -18,6 +18,7 @@
 #include <Windows.h>
 #include "Resource.h"
 void windowcapture();
+BOOL DeleteDirectoryFile(LPCTSTR RootDir);
 void goevent(int x, int y, int flag);
 void Show(char *str, IplImage *img);
 using namespace cv;
@@ -86,6 +87,7 @@ BEGIN_MESSAGE_MAP(CAutosysDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CAutosysDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDOK, &CAutosysDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CAutosysDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_BUTTON2, &CAutosysDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -245,7 +247,6 @@ void CAutosysDlg::operate() {
 	while (working) {
 		working = finder.FindNextFile();
 		CString curfile = finder.GetFileName();
-		//MessageBox(curfile);
 		CT2CA pszConvertedAnsiString(curfile);
 		std::string ccurfile(pszConvertedAnsiString);
 		parsing(sselectjob, ccurfile);
@@ -344,14 +345,14 @@ void goevent(int x, int y, int flag) {
 		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 	}
 	else if (flag == 2) {
-		mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-		mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 	}
 	else if (flag == 3) {
-		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-		mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+		mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
 	}
 
 };
@@ -437,7 +438,7 @@ int getHangulKey(wchar_t c) {
 	case L'ㄷ':
 		return 89;
 	case L'ㄸ':
-		return 69;
+		return 89;
 	case L'ㄱ':
 		return 82;
 	case L'ㄲ':
@@ -490,4 +491,72 @@ int getHangulKey(wchar_t c) {
 		return 77;
 	}
 	return 0;
+}
+
+void CAutosysDlg::OnBnClickedButton2() // 삭제하기버튼
+{
+	
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString selectjob;
+	CFileFind finder;
+	CString locate;
+	int i = 1;
+	bool working;
+	m_listbox.GetText(m_listbox.GetCurSel(), selectjob);
+	CT2CA pszConvertedAnsiString(selectjob);
+	std::string sselectjob(pszConvertedAnsiString);
+	sselectjob = "auto/" + sselectjob;
+	CString cs(sselectjob.c_str());
+	DeleteDirectoryFile(cs);
+	foldersearch();
+}
+
+BOOL DeleteDirectoryFile(LPCTSTR RootDir)
+{
+	if (RootDir == NULL)
+	{
+		return FALSE;
+	}
+
+	BOOL bRval = FALSE;
+
+
+	CString szNextDirPath = _T("");
+	CString szRoot = _T("");
+
+
+	// 해당 디렉토리의 모든 파일을 검사한다.
+	szRoot.Format(_T("%s\\*.*"), RootDir);
+
+	CFileFind find;
+
+	bRval = find.FindFile(szRoot);
+
+	if (bRval == FALSE)
+	{
+		return bRval;
+	}
+
+	while (bRval)
+	{
+		bRval = find.FindNextFile();
+
+		// . or .. 인 경우 무시 한다.  
+		if (find.IsDots() == FALSE)
+		{
+			// Directory 일 경우 재귀호출 한다.
+			if (find.IsDirectory())
+			{
+				DeleteDirectoryFile(find.GetFilePath());
+			}
+			// file일 경우 삭제 
+			else
+			{
+				bRval = DeleteFile(find.GetFilePath());
+			}
+		}
+	}
+	find.Close();
+	bRval = RemoveDirectory(RootDir);
+	return bRval;
 }

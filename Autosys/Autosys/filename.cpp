@@ -1,12 +1,10 @@
 // filename.cpp : 구현 파일입니다.
 //
-
 #include "stdafx.h"
 #include "Autosys.h"
 #include "filename.h"
 #include "afxdialogex.h"
 #include "ChildDlg.h"
-
 // filename 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(filename, CDialogEx)
@@ -57,6 +55,10 @@ void filename::OnBnClickedOk()
 	
 	CString filename;
 	GetDlgItemText(IDC_EDIT1, filename);
+	
+	if (GetFileAttributes(L"auto") == -1) {
+		CreateDirectory(L"auto",NULL);
+	}
 	CString cstring(_T("auto/"));
 	filename = cstring + filename;
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
