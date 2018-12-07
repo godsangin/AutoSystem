@@ -45,4 +45,5 @@ public:
 	void matching(string jobname, string filename,int flag);
 
 	CListBox m_listbox;
+	afx_msg void OnBnClickedButton2();
 };

@@ -18,6 +18,7 @@
 
 using namespace std;
 using namespace cv;
+int BreakHan(wchar_t *str, wchar_t *buffer, UINT nSize);
 void keybdeventAction(char buffer[], int strLength);
 void windowcapture();
 static void mouse_callback(int event, int x, int y, int, void* param);
@@ -98,40 +99,31 @@ void ChildDlg::OnBnClickedButton4()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	string sqstr = to_string(sequence);
 	ofstream out(filename + "/" + sqstr + "@" + flag + ".txt");
-	//ofstream out("ddd.txt");
 	sequence++;
+
+	wchar_t *str;
+	wchar_t buffer[4096];
+	
 	CString s;
 	GetDlgItemText(IDC_EDIT1, s);
-	CT2CA pszConvertedAnsiString(s);
+	str = LPWSTR(LPCTSTR(s));
+	str = LPWSTR(LPCTSTR(s));
+	BreakHan(str, buffer, sizeof buffer);
+
+	setlocale(LC_ALL, "Korean");
+	SetDlgItemText(IDC_EDIT1, NULL);
+
+	CT2CA pszConvertedAnsiString(buffer);
 	std::string sentence(pszConvertedAnsiString);
+	
+	
+
 	if (out.is_open()) {
 		out << sentence;
 	}
 	else {
 
 	}
-
-	/*CString str;
-
-	mEdit.GetWindowTextW(str);
-	char buffer[256];
-	strcpy_s(buffer, CStringA(str).GetString());
-	SetCursorPos(1260, 10);
-	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-	Sleep(20);
-	SetCursorPos(20, 460);
-	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-	Sleep(20);
-	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-	Sleep(1000);
-
-	keybdeventAction(buffer, str.GetLength());*/
-
-
-	//MessageBox(BreakHan(w_temp, buffer, sizeof buffer));
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
@@ -164,8 +156,6 @@ void ChildDlg::OnEnChangeEdit1()
 
 
 void windowcapture() {
-	//ShowWindow(SW_SHOWMINIMIZED);
-	//visible = 0;
 	HWND hWnd = GetConsoleWindow();
 	ShowWindow(hWnd, SW_HIDE);
 	Sleep(100);
@@ -228,7 +218,6 @@ Mat hwnd2mat(HWND hwnd)
 	// copy from the window device context to the bitmap device context
 	StretchBlt(hwindowCompatibleDC, 0, 0, width, height, hwindowDC, 0, 0, srcwidth, srcheight, SRCCOPY); //change SRCCOPY to NOTSRCCOPY for wacky colors !
 	GetDIBits(hwindowCompatibleDC, hbwindow, 0, height, src.data, (BITMAPINFO *)&bi, DIB_RGB_COLORS);  //copy from hwindowCompatibleDC to hbwindow
-
 
 																									   // avoid memory leak
 	DeleteObject(hbwindow);
@@ -300,4 +289,59 @@ static void imageCapture() {
 	setMouseCallback("Original IMG", mouse_callback);
 	waitKey(0);
 
+}
+int BreakHan(wchar_t *str, wchar_t *buffer, UINT nSize)
+{
+	//초성 
+	static const wchar_t wcHead[] = { L'ㄱ', L'ㄲ', L'ㄴ', L'ㄷ',
+		L'ㄸ', L'ㄹ', L'ㅁ', L'ㅂ',
+		L'ㅃ', L'ㅅ', L'ㅆ', L'ㅇ',
+		L'ㅈ', L'ㅉ', L'ㅊ', L'ㅋ',
+		L'ㅌ', L'ㅍ', L'ㅎ' };
+
+	//중성 
+	static const wchar_t wcMid[] = { L'ㅏ', L'ㅐ', L'ㅑ', L'ㅒ',
+		L'ㅓ', L'ㅔ', L'ㅕ', L'ㅖ',
+		L'ㅗ', L'ㅘ', L'ㅙ', L'ㅚ',
+		L'ㅛ', L'ㅜ', L'ㅝ', L'ㅞ',
+		L'ㅟ', L'ㅠ', L'ㅡ', L'ㅢ', L'ㅣ' };
+
+	//종성 
+	static const wchar_t wcTail[] = { L' ', L'ㄱ', L'ㄲ', L'ㄳ',
+		L'ㄴ', L'ㄵ', L'ㄶ', L'ㄷ',
+		L'ㄹ', L'ㄺ', L'ㄻ', L'ㄼ',
+		L'ㄽ', L'ㄾ', L'ㄿ', L'ㅀ',
+		L'ㅁ', L'ㅂ', L'ㅄ', L'ㅅ',
+		L'ㅆ', L'ㅇ', L'ㅈ', L'ㅊ',
+		L'ㅋ', L'ㅌ', L'ㅍ', L'ㅎ' };
+
+	UINT    pos = 0;
+
+	while (*str != '\0')
+	{
+		if (*str < 256)
+		{
+			if (pos + 2 >= nSize - 1)
+				break;
+
+			buffer[pos] = *str;
+			++pos;
+		}
+		else
+		{
+			if (pos + 4 >= nSize - 1)
+				break;
+
+			buffer[pos] = wcHead[(*str - 0xAC00) / (21 * 28)];
+			buffer[pos + 1] = wcMid[(*str - 0xAC00) % (21 * 28) / 28];
+			buffer[pos + 2] = wcTail[(*str - 0xAC00) % 28];
+
+			pos += 3;
+		}
+
+		++str;
+	}
+
+	buffer[pos] = '\0';
+	return pos;
 }
